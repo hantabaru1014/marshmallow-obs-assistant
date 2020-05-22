@@ -5,12 +5,14 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron ."
+    "start": "electron .",
+    "build-win": "node build-win.js"
   },
   "author": "hantabaru1014",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^9.0.0"
+    "electron": "^9.0.0",
+    "electron-builder": "^22.6.1"
   },
   "dependencies": {
     "electron-store": "^5.1.1",

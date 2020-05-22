@@ -68,7 +68,11 @@ function createWindow () {
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
 
-  const defaultSavePath = path.join(__dirname, 'dl-marshmallow.png');
+  let dirPath = path.resolve('.');
+  if (process.env.PORTABLE_EXECUTABLE_DIR){//electron-builder target = portable
+    dirPath = process.env.PORTABLE_EXECUTABLE_DIR;
+  }
+  const defaultSavePath = path.join(dirPath, 'dl-marshmallow.png');//__dirname, process.env.INIT_CWD, 
   mainWindow.webContents.session.on('will-download', (event, item, webContents) => {
     let path = store.get('imagePath');
     if (!path){

@@ -1,4 +1,3 @@
-// Modules to control application life and create native browser window
 const {app, BrowserWindow, Menu, shell} = require('electron')
 const path = require('path')
 const windowStateKeeper = require('electron-window-state');
@@ -20,7 +19,7 @@ const menuTemplate = [
     submenu: [
       isMac ? { role: 'close' } : { role: 'quit' },
       {
-        label: 'settings',
+        label: 'Settings',
         click: () => {
           shell.openPath(store.path);
         }
@@ -29,12 +28,15 @@ const menuTemplate = [
   },
   {role: 'viewMenu'},
   {
-    label: 'help',
+    label: 'Help',
     submenu: [
       {
-        label: 'about',
+        label: 'Version '+app.getVersion()
+      },
+      {
+        label: 'About',
         click: () => {
-          shell.openExternal('https://github.com/hantabaru1014/marshmallow-obs-assistant.git');
+          shell.openExternal('https://github.com/hantabaru1014/marshmallow-obs-assistant');
         }
       }
     ]
@@ -61,8 +63,7 @@ function createWindow () {
   })
   mainWindowState.manage(mainWindow);
 
-  // and load the index.html of the app.
-  //mainWindow.loadFile('index.html')
+  // open marshmallow
   mainWindow.loadURL(store.get('url'));
 
   // Open the DevTools.
@@ -102,6 +103,3 @@ app.on('window-all-closed', function () {
   // to stay active until the user quits explicitly with Cmd + Q
   if (process.platform !== 'darwin') app.quit()
 })
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.

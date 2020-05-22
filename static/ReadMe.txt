@@ -1,6 +1,5 @@
 
 マシュマロ配信支援ツール（仮）
-	v 0.1
 
 作者：hantabaru1014@gmail.com (Twitter: @hantabaru1014)
 URL：https://github.com/hantabaru1014/marshmallow-obs-assistant.git

@@ -34,7 +34,7 @@ const menuTemplate = [
       {
         label: 'about',
         click: () => {
-          shell.openExternal('https://twitter.com/hantabaru1014');
+          shell.openExternal('https://github.com/hantabaru1014/marshmallow-obs-assistant.git');
         }
       }
     ]

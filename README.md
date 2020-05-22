@@ -1,5 +1,5 @@
-# marshmallow-obs-assistant
-[![動作デモ](https://img.youtube.com/vi/QxS2tCDDrvk/0.jpg)](https://www.youtube.com/watch?v=QxS2tCDDrvk)  
+# マシュマロ配信支援ツール（仮）
+[![動作デモ](https://drive.google.com/uc?id=1RtjFXpPMXOGBBnpf1xxfLRBn6WLj85d1)](https://www.youtube.com/watch?v=QxS2tCDDrvk)  
 マシュマロ配信で，ダウンロードフォルダがマシュマロの画像で埋まる・画像を扱うのが面倒といった問題を軽減してくれるツールです。  
 やることは，このソフト上で行われるダウンロードを問答無用で指定のファイルにDLするだけです。  
 

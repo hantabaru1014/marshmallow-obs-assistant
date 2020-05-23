@@ -6,11 +6,11 @@
 
 # ダウンロード
 [Releaseページ](https://github.com/hantabaru1014/marshmallow-obs-assistant/releases)から最新のzipをダウンロードして，解凍してご使用ください。  
-v0.1 - [直接ダウンロード](https://github.com/hantabaru1014/marshmallow-obs-assistant/releases/download/v0.1/marshmallow-obs-assistant_v0.1.zip)
+v0.1.2 - [直接ダウンロード](https://github.com/hantabaru1014/marshmallow-obs-assistant/releases/download/v0.1.2/marshmallow-obs-assistant_v0.1.2.zip)
 
 # 使い方
 1. ソフトを起動したら，マシュマロのサイトが開かれると思うのでログインして，受信箱を表示してください。
-2. 「画像ダウンロード」を押すと，このフォルダにdl-marshmallow.pngができるので，それをOBS等で表示してください。
+2. 「画像ダウンロード」を押すと，exeのあるフォルダにdl-marshmallow.pngができるので，それをOBS等で表示してください。
 3. あとは，「画像ダウンロード」をするたびに，同じファイルに上書きされます。OBSは画像が更新されると自動でOBS上でも更新されるのでいちいちOBSに画像を入れるということをしなくても良くなるはずです。
 
 # 設定

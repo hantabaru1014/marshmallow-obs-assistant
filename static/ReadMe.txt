@@ -2,13 +2,13 @@
 マシュマロ配信支援ツール（仮）
 
 作者：hantabaru1014@gmail.com (Twitter: @hantabaru1014)
-URL：https://github.com/hantabaru1014/marshmallow-obs-assistant.git
+URL：https://github.com/hantabaru1014/marshmallow-obs-assistant
 
 
 はじめに：
 　ダウンロードありがとうございます。
 　このソフトはマシュマロ配信で，ダウンロードフォルダがマシュマロの画像で埋まる・画像を扱うのが面倒といった問題を軽減してくれるツールです。やることは，このソフトで行われるダウンロードを問答無用で指定のファイルにDLするだけです。今の所それだけです。
-　MITライセンスのオープンソースソフトウェアです。何か問題が起きても作者は一切の責任を負いません。
+　MIT Licenseのオープンソースソフトウェアです。何か問題が起きても作者は一切の責任を負いません。
 　不具合報告はTwitterにお願いします（対応を保証するものではありません）。
 
 

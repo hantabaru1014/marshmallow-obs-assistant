@@ -60,6 +60,11 @@ const menuTemplate = [
 ];
 const menu = Menu.buildFromTemplate(menuTemplate);
 Menu.setApplicationMenu(menu);
+app.setAboutPanelOptions({
+  applicationName: 'マシュマロ配信支援ツール（仮）',
+  applicationVersion: 'version: '+app.getVersion(),
+  copyright: '(c) 2020 hantabaru1014@gmail.com'
+});
 
 contextMenu({
   menu: actions => [
@@ -101,7 +106,7 @@ function createWindow () {
   mainWindow.loadURL(store.get('defaultUrl'));
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 
   ipcMain.on('console', (event, arg) => console.log(arg));
   ipcMain.on('showMM', (event, arg) => {
@@ -115,6 +120,7 @@ function createWindow () {
       console.log('change MM');
       mmviewWindow.webContents.send('changeMM', receiveObj.text);
     }
+    mmviewWindow.focus();
   });
   const defaultTextSavePath = path.join(dirPath, 'dl-marshmallow.txt');
   ipcMain.on('dlImage', (event, arg) => {
@@ -168,6 +174,11 @@ function createMMView(){
     // parent: mainWindow,
     width: 600,
     height: 400,
+    maxWidth: 600,
+    maximizable: false,
+    fullscreenable: false,
+    title: 'marshmallow viewer',
+    hasShadow: false,
     webPreferences: {
       nodeIntegration: false,
       preload: path.join(__dirname, 'mmview_inject.js')

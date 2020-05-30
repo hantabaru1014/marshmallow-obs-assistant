@@ -1,6 +1,6 @@
 {
   "name": "marshmallow-obs-assistant",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "",
   "main": "main.js",
   "scripts": {
@@ -12,10 +12,13 @@
   "license": "MIT",
   "devDependencies": {
     "electron": "^9.0.0",
-    "electron-builder": "^22.6.1"
+    "electron-builder": "^22.6.1",
+    "license-checker": "^25.0.1"
   },
   "dependencies": {
+    "electron-context-menu": "^2.0.1",
     "electron-store": "^5.1.1",
-    "electron-window-state": "^5.0.3"
+    "electron-window-state": "^5.0.3",
+    "jquery": "^3.5.1"
   }
 }

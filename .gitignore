@@ -1,3 +1,5 @@
 node_modules
-/*.png
+/dl-marshmallow.png
+/dl-marshmallow.txt
 dist
+/static/icon256.png

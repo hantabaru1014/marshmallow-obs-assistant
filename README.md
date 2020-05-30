@@ -9,6 +9,7 @@ v0.2から：
 
 # ダウンロード
 [Releaseページ](https://github.com/hantabaru1014/marshmallow-obs-assistant/releases)から最新のzipをダウンロードして，解凍してご使用ください。  
+v0.2 - [直接ダウンロード](https://github.com/hantabaru1014/marshmallow-obs-assistant/releases/download/v0.2/marshmallow-obs-assistant_v0.2.zip)
 
 # 使い方
 1. ソフトを起動したら，マシュマロのサイトが開かれると思うのでログインして，受信箱を表示してください。

@@ -4,8 +4,7 @@ const {ipcRenderer} = require('electron');
 
 window.addEventListener('load', () => {
     const $ = require('jquery');
-
-    $(function(){
+    const applyScript = () => {
         //https://marshmallow-qa.com/messages/personalのページ
         $('li[data-message-uuid]').each((index, elm) => {
             let messageRoot = $(elm);
@@ -35,5 +34,13 @@ window.addEventListener('load', () => {
                 ipcRenderer.send('dlImage', sendJson);
             });
         });
-    });
+        $('.load-more').on('click', (e) => {
+            ipcRenderer.send('console', 'load-more click!');
+            setTimeout(() => {
+                applyScript();
+            }, 1000);
+        });
+    }
+
+    applyScript();
 });

@@ -122,6 +122,9 @@ function createWindow () {
     }
     mmviewWindow.focus();
   });
+  ipcMain.on('clearMM', (event, arg) => {
+    mmviewWindow.loadFile('mmview.html');
+  });
   const defaultTextSavePath = path.join(dirPath, 'dl-marshmallow.txt');
   ipcMain.on('dlImage', (event, arg) => {
     const receiveObj = JSON.parse(arg);
@@ -136,6 +139,9 @@ function createWindow () {
   });
   ipcMain.on('getGBColor', (event, arg) => {
     event.reply('reply-getGBColor', store.get('mmviewBGColor'));
+  });
+  ipcMain.on('reloadMain', (event, arg) => {
+    mainWindow.webContents.reload();
   });
 
   let currentUrl = store.get('defaultUrl');

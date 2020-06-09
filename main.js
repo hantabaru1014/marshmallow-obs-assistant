@@ -1,9 +1,10 @@
-const {app, BrowserWindow, Menu, shell, ipcMain, net} = require('electron');
+const {app, BrowserWindow, Menu, shell, ipcMain, net, dialog} = require('electron');
 const path = require('path');
 const windowStateKeeper = require('electron-window-state');
 const Store = require('electron-store');
 const contextMenu = require('electron-context-menu');
 const fs = require('fs');
+const https = require('https');
 
 let mainWindow;
 let mmviewWindow;
@@ -16,7 +17,9 @@ const store = new Store({
     imagePath: '',
     textPath: '',
     mmviewBGColor: 'green',
-    useMMView: true
+    useMMView: true,
+    checkUpdate: true,
+    updateUrl: 'https://github.com/hantabaru1014/marshmallow-obs-assistant/releases/latest'
   }
 });
 app.disableHardwareAcceleration();//OBSでウィンドウキャプチャできるように
@@ -47,6 +50,12 @@ const menuTemplate = [
         label: 'Github',
         click: () => {
           shell.openExternal('https://github.com/hantabaru1014/marshmallow-obs-assistant');
+        }
+      },
+      {
+        label: 'check update',
+        click: () => {
+          checkUpdate();
         }
       },
       {
@@ -213,7 +222,8 @@ function createMMView(){
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
-  createWindow()
+  createWindow();
+  checkUpdate();
   
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
@@ -227,4 +237,37 @@ app.on('window-all-closed', function () {
   // On macOS it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
   if (process.platform !== 'darwin') app.quit()
-})
+});
+
+function isNewVersion(curVer, newVer){
+  const curSV = curVer.split('.');
+  const newSV = newVer.split('.');
+  for (let i=0;i<curSV.length;i++){
+    if (parseInt(curSV[i]) < parseInt(newSV[i])) return true;
+  }
+  return false;
+}
+
+function checkUpdate(){
+  if (!store.get('checkUpdate', true)) return;
+  const url = store.get('updateUrl');
+  https.get(url, (res) => {
+    res.on('data', (chunk) => {
+      let result = /"http.+\/releases\/tag\/(.+)"/.exec(chunk);
+      if (!result) return;
+      if (isNewVersion(app.getVersion(), result[1].substr(1))){
+        //open dialog
+        const selected = dialog.showMessageBoxSync(mainWindow, {
+          type: 'info',
+          buttons: ['開く', '無視'],
+          title: '新しいバージョンがあります',
+          message: '新しいバージョンがあります。リリースページを開きますか？\n現在のバージョン: v'+app.getVersion()+'\n新しいバージョン: '+result[1],
+          cancelId: 1
+        });
+        if (selected == 0) shell.openExternal(store.get('updateUrl'));
+      }
+    });
+  }).on('error', (e) => {
+    console.log(e);
+  });
+}

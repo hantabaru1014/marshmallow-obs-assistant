@@ -9,6 +9,8 @@ const https = require('https');
 let mainWindow;
 let mmviewWindow;
 
+const APP_NAME = 'マシュマロ配信支援ツール（仮）';
+
 const store = new Store({
   defaults: {
     defaultUrl: 'https://marshmallow-qa.com/messages/personal',
@@ -57,7 +59,7 @@ const menuTemplate = [
         }
       },
       {
-        label: 'check update',
+        label: 'Check Update',
         click: () => {
           checkUpdate();
         }
@@ -74,7 +76,7 @@ const menuTemplate = [
 const menu = Menu.buildFromTemplate(menuTemplate);
 Menu.setApplicationMenu(menu);
 app.setAboutPanelOptions({
-  applicationName: 'マシュマロ配信支援ツール（仮）',
+  applicationName: APP_NAME,
   applicationVersion: 'version: '+app.getVersion(),
   copyright: '(c) 2020 hantabaru1014@gmail.com'
 });
@@ -112,6 +114,7 @@ function createWindow () {
     y: mainWindowState.y,
     width: mainWindowState.width,
     height: mainWindowState.height,
+    title: APP_NAME,
     webPreferences: {
       nodeIntegration: false,
       preload: path.join(__dirname, 'main_inject.js')
@@ -140,7 +143,8 @@ function createWindow () {
     mmviewWindow.focus();
   });
   ipcMain.on('clearMM', (event, arg) => {
-    mmviewWindow.loadFile('mmview.html');
+    // mmviewWindow.loadFile('mmview.html');
+    mmviewWindow.webContents.send('hideMM');
   });
   const defaultTextSavePath = path.join(dirPath, 'dl-marshmallow.txt');
   ipcMain.on('dlImage', (event, arg) => {
@@ -187,12 +191,15 @@ function createWindow () {
     if (!mmviewWindow) return;
     mmviewWindow.close();
   });
+  mainWindow.on('page-title-updated', (event, title, expSet) => {
+    event.preventDefault();
+  });
 
   mainWindow.webContents.on('new-window', (event, url) => {
     event.preventDefault();
     shell.openExternal(url);
   });
-
+  
   if (store.get('mmview.useMMView')) createMMView();
 }
 

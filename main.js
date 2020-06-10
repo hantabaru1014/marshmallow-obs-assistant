@@ -1,6 +1,6 @@
 const {app, BrowserWindow, Menu, shell, ipcMain, net, dialog} = require('electron');
 const path = require('path');
-const windowStateKeeper = require('electron-window-state');
+const windowStateManager = require('electron-window-state-manager');
 const Store = require('electron-store');
 const contextMenu = require('electron-context-menu');
 const fs = require('fs');
@@ -16,10 +16,14 @@ const store = new Store({
     imageUrl: 'https://cdn.marshmallow-qa.com/system/images/{uuid}.png',
     imagePath: '',
     textPath: '',
-    mmviewBGColor: 'green',
-    useMMView: true,
-    checkUpdate: true,
-    updateUrl: 'https://github.com/hantabaru1014/marshmallow-obs-assistant/releases/latest'
+    updateChecker: {
+      checkUpdate: true,
+      updateUrl: 'https://github.com/hantabaru1014/marshmallow-obs-assistant/releases/latest',
+    },
+    mmview: {
+      useMMView: true,
+      mmviewBGColor: 'green',
+    }
   }
 });
 app.disableHardwareAcceleration();//OBSでウィンドウキャプチャできるように
@@ -88,12 +92,16 @@ contextMenu({
   }
 });
 
+const mainWindowState = new windowStateManager('mainWindow', {
+  defaultWidth: 800,
+  defaultHeight: 600
+});
+const mmviewWinState = new windowStateManager('mmviewWindow', {
+  defaultWidth: 600,
+  defaultHeight: 400
+});
+
 function createWindow () {
-  // Create the browser window.
-  let mainWindowState = windowStateKeeper({
-    defaultWidth: 800,
-    defaultHeight: 600
-  });
   let dirPath = path.resolve('.');
   if (process.env.PORTABLE_EXECUTABLE_DIR){//electron-builder target = portable
     dirPath = process.env.PORTABLE_EXECUTABLE_DIR;
@@ -108,8 +116,8 @@ function createWindow () {
       nodeIntegration: false,
       preload: path.join(__dirname, 'main_inject.js')
     },
-  })
-  mainWindowState.manage(mainWindow);
+  });
+  if (mainWindowState.maximized) mainWindow.maximize();
 
   // open marshmallow
   mainWindow.loadURL(store.get('defaultUrl'));
@@ -119,7 +127,7 @@ function createWindow () {
 
   ipcMain.on('console', (event, arg) => console.log(arg));
   ipcMain.on('showMM', (event, arg) => {
-    if (!store.get('useMMView')) return;
+    if (!store.get('mmview.useMMView')) return;
     const receiveObj = JSON.parse(arg);
     if (!mmviewWindow) createMMView();
     if (!mmviewWindow.isVisible()) mmviewWindow.show();
@@ -147,7 +155,7 @@ function createWindow () {
     });
   });
   ipcMain.on('getGBColor', (event, arg) => {
-    event.reply('reply-getGBColor', store.get('mmviewBGColor'));
+    event.reply('reply-getGBColor', store.get('mmview.mmviewBGColor'));
   });
   ipcMain.on('reloadMain', (event, arg) => {
     mainWindow.webContents.reload();
@@ -170,6 +178,10 @@ function createWindow () {
     item.setSavePath(path);
     console.log(item.getSavePath());
   });
+
+  mainWindow.on('close', () => {
+    mainWindowState.saveState(mainWindow);
+  });
   mainWindow.on('closed', () => {
     mainWindow = null;
     if (!mmviewWindow) return;
@@ -181,14 +193,16 @@ function createWindow () {
     shell.openExternal(url);
   });
 
-  if (store.get('useMMView')) createMMView();
+  if (store.get('mmview.useMMView')) createMMView();
 }
 
 function createMMView(){
   mmviewWindow = new BrowserWindow({
     // parent: mainWindow,
-    width: 600,
-    height: 400,
+    x: mmviewWinState.x,
+    y: mmviewWinState.y,
+    width: mmviewWinState.width,
+    height: mmviewWinState.height,
     maxWidth: 600,
     maximizable: false,
     fullscreenable: false,
@@ -205,6 +219,7 @@ function createMMView(){
   // mmviewWindow.openDevTools();
 
   mmviewWindow.on('close', (e) => {
+    mmviewWinState.saveState(mmviewWindow);
     if (mainWindow){
       e.preventDefault();
       mmviewWindow.hide();
@@ -249,8 +264,8 @@ function isNewVersion(curVer, newVer){
 }
 
 function checkUpdate(){
-  if (!store.get('checkUpdate', true)) return;
-  const url = store.get('updateUrl');
+  if (!store.get('updateChecker.checkUpdate', true)) return;
+  const url = store.get('updateChecker.updateUrl');
   https.get(url, (res) => {
     res.on('data', (chunk) => {
       let result = /"http.+\/releases\/tag\/(.+)"/.exec(chunk);
@@ -264,7 +279,7 @@ function checkUpdate(){
           message: '新しいバージョンがあります。リリースページを開きますか？\n現在のバージョン: v'+app.getVersion()+'\n新しいバージョン: '+result[1],
           cancelId: 1
         });
-        if (selected == 0) shell.openExternal(store.get('updateUrl'));
+        if (selected == 0) shell.openExternal(store.get('updateChecker.updateUrl'));
       }
     });
   }).on('error', (e) => {

@@ -1,12 +1,15 @@
-const {app, BrowserWindow, Menu, shell, ipcMain, net} = require('electron');
+const {app, BrowserWindow, Menu, shell, ipcMain, net, dialog} = require('electron');
 const path = require('path');
-const windowStateKeeper = require('electron-window-state');
+const windowStateManager = require('electron-window-state-manager');
 const Store = require('electron-store');
 const contextMenu = require('electron-context-menu');
 const fs = require('fs');
+const https = require('https');
 
 let mainWindow;
 let mmviewWindow;
+
+const APP_NAME = 'マシュマロ配信支援ツール（仮）';
 
 const store = new Store({
   defaults: {
@@ -15,8 +18,14 @@ const store = new Store({
     imageUrl: 'https://cdn.marshmallow-qa.com/system/images/{uuid}.png',
     imagePath: '',
     textPath: '',
-    mmviewBGColor: 'green',
-    useMMView: true
+    updateChecker: {
+      checkUpdate: true,
+      updateUrl: 'https://github.com/hantabaru1014/marshmallow-obs-assistant/releases/latest',
+    },
+    mmview: {
+      useMMView: true,
+      mmviewBGColor: 'green',
+    }
   }
 });
 app.disableHardwareAcceleration();//OBSでウィンドウキャプチャできるように
@@ -50,6 +59,12 @@ const menuTemplate = [
         }
       },
       {
+        label: 'Check Update',
+        click: () => {
+          checkUpdate();
+        }
+      },
+      {
         label: 'About',
         click: () => {
           app.showAboutPanel();
@@ -61,7 +76,7 @@ const menuTemplate = [
 const menu = Menu.buildFromTemplate(menuTemplate);
 Menu.setApplicationMenu(menu);
 app.setAboutPanelOptions({
-  applicationName: 'マシュマロ配信支援ツール（仮）',
+  applicationName: APP_NAME,
   applicationVersion: 'version: '+app.getVersion(),
   copyright: '(c) 2020 hantabaru1014@gmail.com'
 });
@@ -79,12 +94,16 @@ contextMenu({
   }
 });
 
+const mainWindowState = new windowStateManager('mainWindow', {
+  defaultWidth: 800,
+  defaultHeight: 600
+});
+const mmviewWinState = new windowStateManager('mmviewWindow', {
+  defaultWidth: 600,
+  defaultHeight: 400
+});
+
 function createWindow () {
-  // Create the browser window.
-  let mainWindowState = windowStateKeeper({
-    defaultWidth: 800,
-    defaultHeight: 600
-  });
   let dirPath = path.resolve('.');
   if (process.env.PORTABLE_EXECUTABLE_DIR){//electron-builder target = portable
     dirPath = process.env.PORTABLE_EXECUTABLE_DIR;
@@ -95,12 +114,13 @@ function createWindow () {
     y: mainWindowState.y,
     width: mainWindowState.width,
     height: mainWindowState.height,
+    title: APP_NAME,
     webPreferences: {
       nodeIntegration: false,
       preload: path.join(__dirname, 'main_inject.js')
     },
-  })
-  mainWindowState.manage(mainWindow);
+  });
+  if (mainWindowState.maximized) mainWindow.maximize();
 
   // open marshmallow
   mainWindow.loadURL(store.get('defaultUrl'));
@@ -110,7 +130,7 @@ function createWindow () {
 
   ipcMain.on('console', (event, arg) => console.log(arg));
   ipcMain.on('showMM', (event, arg) => {
-    if (!store.get('useMMView')) return;
+    if (!store.get('mmview.useMMView')) return;
     const receiveObj = JSON.parse(arg);
     if (!mmviewWindow) createMMView();
     if (!mmviewWindow.isVisible()) mmviewWindow.show();
@@ -121,6 +141,10 @@ function createWindow () {
       mmviewWindow.webContents.send('changeMM', receiveObj.text);
     }
     mmviewWindow.focus();
+  });
+  ipcMain.on('clearMM', (event, arg) => {
+    // mmviewWindow.loadFile('mmview.html');
+    mmviewWindow.webContents.send('hideMM');
   });
   const defaultTextSavePath = path.join(dirPath, 'dl-marshmallow.txt');
   ipcMain.on('dlImage', (event, arg) => {
@@ -135,7 +159,10 @@ function createWindow () {
     });
   });
   ipcMain.on('getGBColor', (event, arg) => {
-    event.reply('reply-getGBColor', store.get('mmviewBGColor'));
+    event.reply('reply-getGBColor', store.get('mmview.mmviewBGColor'));
+  });
+  ipcMain.on('reloadMain', (event, arg) => {
+    mainWindow.webContents.reload();
   });
 
   let currentUrl = store.get('defaultUrl');
@@ -155,25 +182,34 @@ function createWindow () {
     item.setSavePath(path);
     console.log(item.getSavePath());
   });
+
+  mainWindow.on('close', () => {
+    mainWindowState.saveState(mainWindow);
+  });
   mainWindow.on('closed', () => {
     mainWindow = null;
     if (!mmviewWindow) return;
     mmviewWindow.close();
+  });
+  mainWindow.on('page-title-updated', (event, title, expSet) => {
+    event.preventDefault();
   });
 
   mainWindow.webContents.on('new-window', (event, url) => {
     event.preventDefault();
     shell.openExternal(url);
   });
-
-  if (store.get('useMMView')) createMMView();
+  
+  if (store.get('mmview.useMMView')) createMMView();
 }
 
 function createMMView(){
   mmviewWindow = new BrowserWindow({
     // parent: mainWindow,
-    width: 600,
-    height: 400,
+    x: mmviewWinState.x,
+    y: mmviewWinState.y,
+    width: mmviewWinState.width,
+    height: mmviewWinState.height,
     maxWidth: 600,
     maximizable: false,
     fullscreenable: false,
@@ -190,6 +226,7 @@ function createMMView(){
   // mmviewWindow.openDevTools();
 
   mmviewWindow.on('close', (e) => {
+    mmviewWinState.saveState(mmviewWindow);
     if (mainWindow){
       e.preventDefault();
       mmviewWindow.hide();
@@ -207,7 +244,8 @@ function createMMView(){
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
-  createWindow()
+  createWindow();
+  checkUpdate();
   
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
@@ -221,4 +259,37 @@ app.on('window-all-closed', function () {
   // On macOS it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
   if (process.platform !== 'darwin') app.quit()
-})
+});
+
+function isNewVersion(curVer, newVer){
+  const curSV = curVer.split('.');
+  const newSV = newVer.split('.');
+  for (let i=0;i<curSV.length;i++){
+    if (parseInt(curSV[i]) < parseInt(newSV[i])) return true;
+  }
+  return false;
+}
+
+function checkUpdate(){
+  if (!store.get('updateChecker.checkUpdate', true)) return;
+  const url = store.get('updateChecker.updateUrl');
+  https.get(url, (res) => {
+    res.on('data', (chunk) => {
+      let result = /"http.+\/releases\/tag\/(.+)"/.exec(chunk);
+      if (!result) return;
+      if (isNewVersion(app.getVersion(), result[1].substr(1))){
+        //open dialog
+        const selected = dialog.showMessageBoxSync(mainWindow, {
+          type: 'info',
+          buttons: ['開く', '無視'],
+          title: '新しいバージョンがあります',
+          message: '新しいバージョンがあります。リリースページを開きますか？\n現在のバージョン: v'+app.getVersion()+'\n新しいバージョン: '+result[1],
+          cancelId: 1
+        });
+        if (selected == 0) shell.openExternal(store.get('updateChecker.updateUrl'));
+      }
+    });
+  }).on('error', (e) => {
+    console.log(e);
+  });
+}

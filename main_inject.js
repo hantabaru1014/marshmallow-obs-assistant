@@ -41,6 +41,44 @@ window.addEventListener('load', () => {
             }, 1000);
         });
     }
+    const genButtons = () => {
+        let btnPain = $('<div></div>').css({'position': 'fixed', 'top': '10px', 'left': '10px'});
+        let btnTemplate = $('<button></button>').css({'border-radius': '6px', 'padding': '8px 5px', 'margin': '3px', 'background-color': '#F3969A', 'color': '#fff'});
+        let reloadBtn = btnTemplate.clone();
+        reloadBtn.html('R');
+        reloadBtn.on({
+            'click': (e) => {
+                console.log('reload');
+                ipcRenderer.send('reloadMain');
+            },
+            'mouseenter': function(e) {
+                $(this).html('ページを再読み込みする');
+            },
+            'mouseleave': function(e) {
+                $(this).html('R');
+            }
+        });
+        btnPain.append(reloadBtn);
+        btnPain.append($('<br>'));
+
+        let clearMMViewBtn = btnTemplate.clone();
+        clearMMViewBtn.html('CM');
+        clearMMViewBtn.on({
+            'click': (e) => {
+                ipcRenderer.send('clearMM');
+            },
+            'mouseenter': function(e) {
+                $(this).html('ビュワーに表示しているマシュマロを消す');
+            },
+            'mouseleave': function(e) {
+                $(this).html('CM');
+            }
+        });
+        btnPain.append(clearMMViewBtn);
+
+        $('body').append(btnPain);
+    }
 
     applyScript();
+    genButtons();
 });

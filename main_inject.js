@@ -17,7 +17,7 @@ window.addEventListener('load', () => {
                 e.preventDefault();
                 const sendJson = JSON.stringify({
                     uuid: messageRoot.data('message-uuid'),
-                    text: messageA.text()
+                    text: messageA.html()
                 });
                 ipcRenderer.send('showMM', sendJson);
                 ipcRenderer.send('dlImage', sendJson);
@@ -30,11 +30,12 @@ window.addEventListener('load', () => {
                 e.preventDefault();
                 const sendJson = JSON.stringify({
                     uuid: root.data('message-uuid'),
-                    text: $('.message-card__text > div').text()
+                    text: $('.message-card__text > div').html()
                 });
                 ipcRenderer.send('showMM', sendJson);
                 ipcRenderer.send('dlImage', sendJson);
             });
+            root.find('a[download] > span').text('食べる ');
         });
     }
     const genButtons = () => {

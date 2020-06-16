@@ -8,6 +8,8 @@ window.addEventListener('load', () => {
         //https://marshmallow-qa.com/messages/personalのページ
         $('li[data-message-uuid]').each((index, elm) => {
             let messageRoot = $(elm);
+            if (messageRoot.attr('mma-mod')) return;
+            messageRoot.attr('mma-mod', 'true');
             let messageA = messageRoot.find('a[data-target="message.content obscene-word.content"]');
             messageRoot.find('a[download] > span').text('食べる ');
 
@@ -33,12 +35,6 @@ window.addEventListener('load', () => {
                 ipcRenderer.send('showMM', sendJson);
                 ipcRenderer.send('dlImage', sendJson);
             });
-        });
-        $('.load-more').on('click', (e) => {
-            ipcRenderer.send('console', 'load-more click!');
-            setTimeout(() => {
-                applyScript();
-            }, 1000);
         });
     }
     const genButtons = () => {
@@ -81,4 +77,9 @@ window.addEventListener('load', () => {
 
     applyScript();
     genButtons();
+
+    const observer = new MutationObserver((mutations) => {
+        applyScript();
+    });
+    observer.observe($('ul.list-group')[0], {childList: true, attributes: true, subtree: true});
 });

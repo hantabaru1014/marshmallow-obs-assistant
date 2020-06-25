@@ -1,7 +1,6 @@
-# マシュマロ配信支援ツール（仮）
-[![動作デモ](https://drive.google.com/uc?id=1RtjFXpPMXOGBBnpf1xxfLRBn6WLj85d1)](https://www.youtube.com/watch?v=QxS2tCDDrvk)  
+# マシュマロ配信支援ツール（仮） 
 [![動作デモv0.2](https://drive.google.com/uc?id=1JVO93O5G6bDRhM5cBDmB9ijOBZea_BUx)](https://drive.google.com/uc?id=1JVO93O5G6bDRhM5cBDmB9ijOBZea_BUx)  
-[YouTube - 動作デモ](https://www.youtube.com/watch?v=QxS2tCDDrvk)  
+[YouTube - 動作デモv0.2](https://www.youtube.com/watch?v=o7OTvmbbBSA)  
 マシュマロ配信で，ダウンロードフォルダがマシュマロの画像で埋まる・画像を管理するのが面倒といった問題を軽減してくれるツールです。  
 マシュマロの「画像ダウンロード」ボタンの機能を置き換えて，OBSへのマシュマロ画像の取り込みの手間を省きます。詳しい動作は上の動画やgif，下記の使い方をご参照ください。  
 
@@ -10,13 +9,15 @@
 
 # 使い方
 1. ソフトを起動したら，マシュマロのサイトが開かれると思うのでログインして，受信箱を表示してください。
-2. 「食べる」（本来は「画像ダウンロード」となっている所）を押すと，exeのあるフォルダにdl-marshmallow.pngができるので，それをOBS等で表示してください。
-3. あとは，「食べる」をするたびに，同じファイルに上書きされます。OBSは画像が更新されると自動でOBS上でも更新されるのでいちいちOBSに画像を入れるということをしなくても良くなるはずです。  
+2. 以下のいずれかの方法で配信ソフトへの取り込みを行ってください。
 ### ビュアーを使う場合： 
-「食べる」を押すとビュアーに表示されるので，OBSのウィンドウキャプチャ機能を用いてOBSに取り込んでください。  
+「食べる」（本来は「画像ダウンロード」となっている所）を押すとビュアーに表示されるので，OBSのウィンドウキャプチャ機能を用いてOBSに取り込んでください。  
 [マシュマロビューの使い方](https://github.com/hantabaru1014/marshmallow-obs-assistant/wiki/%E4%BD%BF%E3%81%84%E6%96%B9---%E3%83%9E%E3%82%B7%E3%83%A5%E3%83%9E%E3%83%AD%E3%83%93%E3%83%A5%E3%83%BC)  
+### 画像を使う場合：
+「食べる」を押すと，exeのあるフォルダにdl-marshmallow.pngができるので，それをOBS等で表示してください。  
+あとは，「食べる」をするたびに，同じファイルに上書きされます。OBSは画像が更新されると自動でOBS上でも更新されるのでいちいちOBSに画像を入れるということをしなくても良くなるはずです。 
 ### テキストを使う場合：  
-dl-marshmallow.txtにテキストで出力されます。ご自由に。
+「食べる」を押すと，exeのあるフォルダのdl-marshmallow.txtにテキストで出力されます。ご自由に。
 
 # 設定
 左上のメニューの[File] → [Settings]を押すと，設定ファイルが開きます。それぞれの項目の意味は以下のとおりです。

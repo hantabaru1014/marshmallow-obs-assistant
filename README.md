@@ -1,5 +1,5 @@
 # マシュマロ配信支援ツール（仮） 
-[![動作デモv0.2](https://drive.google.com/uc?id=1JVO93O5G6bDRhM5cBDmB9ijOBZea_BUx)](https://drive.google.com/uc?id=1JVO93O5G6bDRhM5cBDmB9ijOBZea_BUx)  
+[![動作デモv0.2](https://drive.google.com/uc?id=1JVO93O5G6bDRhM5cBDmB9ijOBZea_BUx)](https://www.youtube.com/watch?v=o7OTvmbbBSA)  
 [YouTube - 動作デモv0.2](https://www.youtube.com/watch?v=o7OTvmbbBSA)  
 マシュマロ配信で，ダウンロードフォルダがマシュマロの画像で埋まる・画像を管理するのが面倒といった問題を軽減してくれるツールです。  
 マシュマロの「画像ダウンロード」ボタンの機能を置き換えて，OBSへのマシュマロ画像の取り込みの手間を省きます。詳しい動作は上の動画やgif，下記の使い方をご参照ください。  

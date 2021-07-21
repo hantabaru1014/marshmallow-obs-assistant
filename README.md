@@ -32,7 +32,7 @@ updateChecker.updateUrl | `"https://github.com/hantabaru1014/marshmallow-obs-ass
 imagePath  | `""` | ダウンロード先のファイルパスです。空白だと"(exeがあるディレクトリ)/dl-marshmallow.png"の扱いになります。画像の置き場にこだわりがある場合は指定してください。絶対パスじゃないと動かないです。
 textPath | `""` | テキスト形式のダウンロード先のファイルパスです。`imagePath`と同様です。
 baseDomain | `"https://marshmallow-qa.com"` | マシュマロのサイトのベースURLです。ドメインが変わった場合等に。
-imageUrl | `"https://cdn.marshmallow-qa.com/system/images/{uuid}.png"` | マシュマロの画像ダウンロード先のURLです。
+imageUrl | `"https://media.marshmallow-qa.com/system/images/{uuid}.png"` | マシュマロの画像ダウンロード先のURLです。
 
 # その他
 アイコンの画像は[こちら](https://www.stockio.com/free-icon/toasted-marshmallows)です。

@@ -1,15 +1,18 @@
-const {app, BrowserWindow, Menu, shell, ipcMain, net, dialog} = require('electron');
+const {app, BrowserWindow, Menu, shell, ipcMain, dialog} = require('electron');
 const path = require('path');
 const windowStateManager = require('electron-window-state-manager');
 const Store = require('electron-store');
 const contextMenu = require('electron-context-menu');
 const fs = require('fs');
 const https = require('https');
+const semver = require('semver');
 
 let mainWindow;
 let mmviewWindow;
 
 const APP_NAME = 'マシュマロ配信支援ツール（仮）';
+// electron-builder target == portable の場合はexeが入っている場所がカレントディレクトリでない。
+let dirPath = process.env.PORTABLE_EXECUTABLE_DIR ? process.env.PORTABLE_EXECUTABLE_DIR : path.resolve('.');
 
 const defaultConfig = {
   defaultUrl: 'https://marshmallow-qa.com/messages/personal',
@@ -19,14 +22,24 @@ const defaultConfig = {
   textPath: '',
   updateChecker: {
     checkUpdate: true,
-    updateUrl: 'https://github.com/hantabaru1014/marshmallow-obs-assistant/releases/latest',
+    releasePageUrl: 'https://github.com/hantabaru1014/marshmallow-obs-assistant/releases/latest',
+    updateApiUrl: 'https://api.github.com/repos/hantabaru1014/marshmallow-obs-assistant/releases',
   },
   mmview: {
     useMMView: true,
     mmviewBGColor: 'green',
   }
 };
-const store = new Store({defaults: defaultConfig});
+const store = new Store({
+  defaults: defaultConfig,
+  clearInvalidConfig: true,
+  migrations: {
+    '>=0.2.5': store => {
+      store.set('imageUrl', defaultConfig.imageUrl);
+      store.set({updateChecker: defaultConfig.updateChecker});
+    },
+  },
+});
 app.disableHardwareAcceleration();//OBSでウィンドウキャプチャできるように
 
 const isMac = process.platform === 'darwin';
@@ -39,7 +52,7 @@ const menuTemplate = [
       {
         label: 'Settings',
         click: () => {
-          shell.openPath(store.path);
+          store.openInEditor();
         }
       }
     ]
@@ -49,7 +62,10 @@ const menuTemplate = [
     label: 'Help',
     submenu: [
       {
-        label: 'Version '+app.getVersion()
+        label: `Version ${app.getVersion()}`,
+        click: () => {
+          checkUpdate(false);
+        }
       },
       {
         label: 'Github',
@@ -58,9 +74,15 @@ const menuTemplate = [
         }
       },
       {
+        label: 'License',
+        click: () => {
+          shell.openPath(path.join(dirPath, 'licenses.txt'));
+        }
+      },
+      {
         label: 'Check Update',
         click: () => {
-          checkUpdate();
+          checkUpdate(false);
         }
       },
       {
@@ -77,7 +99,7 @@ Menu.setApplicationMenu(menu);
 app.setAboutPanelOptions({
   applicationName: APP_NAME,
   applicationVersion: 'version: '+app.getVersion(),
-  copyright: '(c) 2020 hantabaru1014@gmail.com'
+  copyright: '(c) 2020-2021 hantabaru1014@gmail.com'
 });
 
 contextMenu({
@@ -103,11 +125,6 @@ const mmviewWinState = new windowStateManager('mmviewWindow', {
 });
 
 function createWindow () {
-  let dirPath = path.resolve('.');
-  if (process.env.PORTABLE_EXECUTABLE_DIR){//electron-builder target = portable
-    dirPath = process.env.PORTABLE_EXECUTABLE_DIR;
-  }
-
   mainWindow = new BrowserWindow({
     x: mainWindowState.x,
     y: mainWindowState.y,
@@ -237,7 +254,6 @@ function createMMView(){
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
-  updateConfig();
   createWindow();
   checkUpdate();
   
@@ -246,7 +262,7 @@ app.whenReady().then(() => {
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
-})
+});
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {
@@ -255,43 +271,40 @@ app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') app.quit()
 });
 
-function isNewVersion(curVer, newVer){
-  const curSV = curVer.split('.');
-  const newSV = newVer.split('.');
-  for (let i=0;i<curSV.length;i++){
-    if (parseInt(curSV[i]) < parseInt(newSV[i])) return true;
-  }
-  return false;
-}
-
-function checkUpdate(){
+function checkUpdate(silent=true){
   if (!store.get('updateChecker.checkUpdate', true)) return;
-  const url = store.get('updateChecker.updateUrl');
-  https.get(url, (res) => {
+  const url = store.get('updateChecker.updateApiUrl');
+  const options = {
+    headers: { 'User-Agent': 'hantabaru1014/marshmallow-obs-assistant' },
+  };
+  https.get(url, options, (res) => {
+    let data = '';
     res.on('data', (chunk) => {
-      let result = /"http.+\/releases\/tag\/(.+)"/.exec(chunk);
-      if (!result) return;
-      if (isNewVersion(app.getVersion(), result[1].substr(1))){
-        //open dialog
+      data += chunk;
+    });
+    res.on('end', () => {
+      const releases = JSON.parse(data);
+      if (!releases || releases.length == 0) return;
+      const latestVer = releases[0]['tag_name'];
+      if (semver.gt(latestVer, app.getVersion())){
         const selected = dialog.showMessageBoxSync(mainWindow, {
           type: 'info',
           buttons: ['開く', '無視'],
-          title: '新しいバージョンがあります',
-          message: '新しいバージョンがあります。リリースページを開きますか？\n現在のバージョン: v'+app.getVersion()+'\n新しいバージョン: '+result[1],
+          title: APP_NAME,
+          message: '利用可能なアプリの更新があります。リリースページを開きますか？',
+          detail: `現在のバージョン: v${app.getVersion()}\n新しいバージョン: ${latestVer}`,
           cancelId: 1
         });
-        if (selected == 0) shell.openExternal(store.get('updateChecker.updateUrl'));
+        if (selected == 0) shell.openExternal(store.get('updateChecker.releasePageUrl'));
+      }else if (!silent){
+        dialog.showMessageBoxSync(mainWindow, {
+          type: 'info',
+          title: APP_NAME,
+          message: '現在入手可能な更新はありません。'
+        });
       }
     });
   }).on('error', (e) => {
     console.error(e);
   });
-}
-
-// 既にローカルに保存されているConfigでアップデートによりデフォルト値が変わったものを変える
-function updateConfig(){
-  // v0.2.5 で更新。画像ダウンロード先のURLが変更になった。
-  if (store.get('imageUrl') == 'https://cdn.marshmallow-qa.com/system/images/{uuid}.png'){
-    store.set('imageUrl', defaultConfig.imageUrl);
-  }
 }

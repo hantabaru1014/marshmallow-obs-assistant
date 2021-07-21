@@ -28,7 +28,8 @@ defaultUrl | `"https://marshmallow-qa.com/messages/personal"` | 開くマシュ�
 mmview.useMMView | `true` | マシュマロビュアーを使用するかどうかを設定できます。
 mmview.mmviewBGColor | `"green"` | マシュマロビュアーのバックグラウンドカラーです。CSSプロパティの書き方を使用できます。
 updateChecker.checkUpdate | `true` | 簡易アップデートチェック機能の有効・無効を指定します。
-updateChecker.updateUrl | `"https://github.com/hantabaru1014/marshmallow-obs-assistant/releases/latest"` | 簡易アップデートチェックに使用するGithubのrelease/latestのURLです。
+updateChecker.releasePageUrl | `"https://github.com/hantabaru1014/marshmallow-obs-assistant/releases/latest"` | 利用可能な更新があった場合に開くURLです。
+updateChecker.updateApiUrl | `"https://api.github.com/repos/hantabaru1014/marshmallow-obs-assistant/releases"` | 更新確認に使用するGithub APIのURLです。
 imagePath  | `""` | ダウンロード先のファイルパスです。空白だと"(exeがあるディレクトリ)/dl-marshmallow.png"の扱いになります。画像の置き場にこだわりがある場合は指定してください。絶対パスじゃないと動かないです。
 textPath | `""` | テキスト形式のダウンロード先のファイルパスです。`imagePath`と同様です。
 baseDomain | `"https://marshmallow-qa.com"` | マシュマロのサイトのベースURLです。ドメインが変わった場合等に。

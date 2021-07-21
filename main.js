@@ -11,23 +11,22 @@ let mmviewWindow;
 
 const APP_NAME = 'マシュマロ配信支援ツール（仮）';
 
-const store = new Store({
-  defaults: {
-    defaultUrl: 'https://marshmallow-qa.com/messages/personal',
-    baseDomain: 'https://marshmallow-qa.com',
-    imageUrl: 'https://cdn.marshmallow-qa.com/system/images/{uuid}.png',
-    imagePath: '',
-    textPath: '',
-    updateChecker: {
-      checkUpdate: true,
-      updateUrl: 'https://github.com/hantabaru1014/marshmallow-obs-assistant/releases/latest',
-    },
-    mmview: {
-      useMMView: true,
-      mmviewBGColor: 'green',
-    }
+const defaultConfig = {
+  defaultUrl: 'https://marshmallow-qa.com/messages/personal',
+  baseDomain: 'https://marshmallow-qa.com',
+  imageUrl: 'https://media.marshmallow-qa.com/system/images/{uuid}.png',
+  imagePath: '',
+  textPath: '',
+  updateChecker: {
+    checkUpdate: true,
+    updateUrl: 'https://github.com/hantabaru1014/marshmallow-obs-assistant/releases/latest',
+  },
+  mmview: {
+    useMMView: true,
+    mmviewBGColor: 'green',
   }
-});
+};
+const store = new Store({defaults: defaultConfig});
 app.disableHardwareAcceleration();//OBSでウィンドウキャプチャできるように
 
 const isMac = process.platform === 'darwin';
@@ -125,9 +124,6 @@ function createWindow () {
   // open marshmallow
   mainWindow.loadURL(store.get('defaultUrl'));
 
-  // Open the DevTools.
-  // mainWindow.webContents.openDevTools();
-
   ipcMain.on('console', (event, arg) => console.log(arg));
   ipcMain.on('showMM', (event, arg) => {
     if (!store.get('mmview.useMMView')) return;
@@ -143,7 +139,6 @@ function createWindow () {
     mmviewWindow.focus();
   });
   ipcMain.on('clearMM', (event, arg) => {
-    // mmviewWindow.loadFile('mmview.html');
     mmviewWindow.webContents.send('hideMM');
   });
   const defaultTextSavePath = path.join(dirPath, 'dl-marshmallow.txt');
@@ -155,7 +150,7 @@ function createWindow () {
     let path = store.get('textPath');
     if (!path) path = defaultTextSavePath;
     fs.writeFile(path, receiveObj.text, (err, data) => {
-      if(err) console.log(err);
+      if(err) console.error(err);
     });
   });
   ipcMain.on('getGBColor', (event, arg) => {
@@ -205,7 +200,6 @@ function createWindow () {
 
 function createMMView(){
   mmviewWindow = new BrowserWindow({
-    // parent: mainWindow,
     x: mmviewWinState.x,
     y: mmviewWinState.y,
     width: mmviewWinState.width,
@@ -223,7 +217,6 @@ function createMMView(){
   mmviewWindow.removeMenu();
 
   mmviewWindow.loadFile('mmview.html');
-  // mmviewWindow.openDevTools();
 
   mmviewWindow.on('close', (e) => {
     mmviewWinState.saveState(mmviewWindow);
@@ -244,6 +237,7 @@ function createMMView(){
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+  updateConfig();
   createWindow();
   checkUpdate();
   
@@ -290,6 +284,14 @@ function checkUpdate(){
       }
     });
   }).on('error', (e) => {
-    console.log(e);
+    console.error(e);
   });
+}
+
+// 既にローカルに保存されているConfigでアップデートによりデフォルト値が変わったものを変える
+function updateConfig(){
+  // v0.2.5 で更新。画像ダウンロード先のURLが変更になった。
+  if (store.get('imageUrl') == 'https://cdn.marshmallow-qa.com/system/images/{uuid}.png'){
+    store.set('imageUrl', defaultConfig.imageUrl);
+  }
 }

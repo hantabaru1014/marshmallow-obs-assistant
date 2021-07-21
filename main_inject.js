@@ -6,17 +6,17 @@ window.addEventListener('load', () => {
     const $ = require('jquery');
     const applyScript = () => {
         //https://marshmallow-qa.com/messages/personalのページ
-        $('li[data-message-uuid]').each((index, elm) => {
+        $('ul.messages li.message').each((index, elm) => {
             let messageRoot = $(elm);
             if (messageRoot.attr('mma-mod')) return;
             messageRoot.attr('mma-mod', 'true');
-            let messageA = messageRoot.find('a[data-target="message.content obscene-word.content"]');
+            let messageA = messageRoot.find('a[data-target="obscene-word.content"]');
             messageRoot.find('a[download] > span').text('食べる ');
 
             messageRoot.find('a[download]').on('click', (e) => {
                 e.preventDefault();
                 const sendJson = JSON.stringify({
-                    uuid: messageRoot.data('message-uuid'),
+                    uuid: messageRoot.attr('id').replace("message_", ""),
                     text: messageA.html()
                 });
                 ipcRenderer.send('showMM', sendJson);
@@ -24,13 +24,13 @@ window.addEventListener('load', () => {
             });
         });
         //https://marshmallow-qa.com/messages/{uuid}のページ
-        $('ul[data-controller="message"]').each((index, elm) => {
+        $('.card-body').each((index, elm) => {
             let root = $(elm);
-            root.find('a[download]').on('click', (e) => {
+            root.find('a[download]').on('click', function (e) {
                 e.preventDefault();
                 const sendJson = JSON.stringify({
-                    uuid: root.data('message-uuid'),
-                    text: $('.message-card__text > div').html()
+                    uuid: $(this).data('gtm').substr($(this).data('gtm').indexOf(":")+1),
+                    text: root.parent().find('[data-target="obscene-word.content"]').html()
                 });
                 ipcRenderer.send('showMM', sendJson);
                 ipcRenderer.send('dlImage', sendJson);

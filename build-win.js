@@ -24,7 +24,7 @@ function packToZip(){
 
 builder.build({
   config: {
-    'appId': `com.github.hantabaru1014.${packagejson.name}`,
+    'appId': `com.github.selflimit.${packagejson.name}`,
     'win': {
       'target': 'portable',//portable, zip
       'icon': 'static/icon256.png',

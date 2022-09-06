@@ -151,7 +151,7 @@ function createWindow () {
       mmviewWindow.loadURL(store.get('baseDomain')+'/messages/'+receiveObj.uuid);
     }else{
       console.log('change MM');
-	  mmviewWindow.webContents.send('changeMM', receiveObj.text);
+      mmviewWindow.webContents.send('changeMM', receiveObj.text);
     }
     mmviewWindow.focus();
   });

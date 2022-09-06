@@ -10,7 +10,7 @@ window.addEventListener('load', () => {
       let messageRoot = $(elm);
       if (messageRoot.attr('mma-mod')) return;
       messageRoot.attr('mma-mod', 'true');
-      let messageA = messageRoot.find('a[data-target="obscene-word.content"]');
+      let messageA = messageRoot.find('a[data-obscene-word-target="content"]');
       messageRoot.find('a[download] > span').text('食べる ');
 
       messageRoot.find('a[download]').on('click', (e) => {
@@ -30,7 +30,7 @@ window.addEventListener('load', () => {
         e.preventDefault();
         const sendJson = JSON.stringify({
           uuid: $(this).data('gtm').substr($(this).data('gtm').indexOf(":") + 1),
-          text: root.parent().find('[data-target="obscene-word.content"]').html()
+          text: root.parent().find('[data-obscene-word-target="content"]').html()
         });
         ipcRenderer.send('showMM', sendJson);
         ipcRenderer.send('dlImage', sendJson);

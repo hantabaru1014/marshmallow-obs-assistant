@@ -26,7 +26,7 @@ window.addEventListener('load', () => {
     $('body').append(mesCard);
 
     const text = mesCard.find('.message-card__text');
-    const textDiv = mesCard.find('.message-card__text > div[data-target]').detach();
+    const textDiv = mesCard.find('.message-card__text > div[data-obscene-word-target]').detach();
     text.empty();
     text.append(textDiv);
   });
